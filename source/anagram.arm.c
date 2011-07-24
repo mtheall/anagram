@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "anagram.h"
 #include "dictionary.h"
 
@@ -150,6 +151,7 @@ int attempt(char *s)
 
 void init()
 {
+  srand(time(NULL));
   int i = rand()%DICTIONARY_SIZE;
   cleanup();
 
