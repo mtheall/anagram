@@ -1,7 +1,7 @@
 anagram
 =======
 
-This is a game designed to be played on FeOS.
+This is a game designed to be played on [FeOS](https://github.com/fincs/FeOS "FeOS").
 
 Gameplay
 --------
