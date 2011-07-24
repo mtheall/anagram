@@ -6,30 +6,37 @@ char guess[8];
 
 int main(int argc, char *argv[])
 {
-  int i;
   int scroll = 0;
+  int row = 0;
 
   init();
-//  printf("\x1b[2J");
-  for(i = scroll; i < scroll+23; i++)
+  while(scroll > 0 && gramLen(scroll+22) == 0)
+    scroll--;
+  if(scroll < 0)
+    scroll = 0;
+
+  for(row = scroll; row < scroll+23 && gramLen(row) != 0; row++)
   {
-//    printf("\x1b[%d;0H", i);
-    print(i);
+    print(row);
   }
   
   while(scanf("%7s", guess))
   {
     if(strcmp(guess, "QUIT") == 0)
       break;
-    if(attempt(guess))
-    {
-//      printf("\x1b[2J");
-      for(i = scroll; i < scroll+23; i++)
-      {
-//        printf("\x1b%d;0H", i);
-        print(i);
-      }
-    }
+    else if(strcmp(guess, "UP") == 0)
+      scroll--;
+    else if(strcmp(guess, "DOWN") == 0)
+      scroll++;
+    else
+      attempt(guess);
+
+    while(scroll > 0 && gramLen(scroll+22) == 0)
+      scroll--;
+    if(scroll < 0)
+      scroll = 0;
+    for(row = scroll; row < scroll+23; row++)
+      print(row);
   }
   cleanup();
 

@@ -11,6 +11,7 @@ void init();
 void cleanup();
 void print(int index);
 int  attempt(char *s);
+int  gramLen(int index);
 
 #endif /* ANAGRAM_H */
 

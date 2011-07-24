@@ -165,14 +165,28 @@ void init()
 void print(int index)
 {
   int i;
+  int len;
 
   if(grams && index >= 0 && index < size)
   {
     if(grams[index]->solved)
       printf("%s", grams[index]->word);
-    else for(i = 0; i < strlen(grams[index]->word); i++)
-      printf("-");
-    printf("\n");
+    else
+    {
+      len = strlen(grams[index]->word);
+      for(i = 0; i < len; i++)
+        putchar('-');
+    }
+    putchar('\n');
+    fflush(stdout);
   }
+}
+
+int gramLen(int index)
+{
+  if(grams && index >= 0 && index < size)
+    return strlen(grams[index]->word);
+
+  return 0;
 }
 
