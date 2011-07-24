@@ -27,7 +27,7 @@ static int gramcmp(gram **g1, gram **g2)
 }
 
 #ifndef strfry
-void strfry(char *s)
+char* strfry(char *s)
 {
   char t;
   int i, x, y, len;
@@ -45,6 +45,8 @@ void strfry(char *s)
     s[x] = s[y];
     s[y] = t;
   }
+
+  return s;
 }
 #endif
 
