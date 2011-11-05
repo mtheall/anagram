@@ -85,6 +85,8 @@ int main(int argc, char *argv[]) {
   scroll = printList(scroll);
   console->flush();
 
+  keysSetRepeat(30, 6);
+
   while(!quit) {
     swiWaitForVBlank();
     if(redraw) {
@@ -93,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
     redraw = 0;
 
-    down = keysDown();
+    down = keysDown() | keysDownRepeat();
 
     if(down & KEY_UP)
       redraw = 1, scroll--;
