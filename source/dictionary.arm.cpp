@@ -1,5 +1,44 @@
-char dictionary[23638][8] =
-{
+#include <string.h>
+#include <stdlib.h>
+#include "dictionary.h"
+
+Dictionary::Dictionary() {
+}
+
+Dictionary::~Dictionary() {
+}
+
+bool Dictionary::isWord(const char *s) {
+  int upper = DICTIONARY_SIZE;
+  int lower = 0;
+  int mid   = (upper+lower)/2;
+  int rc;
+
+  while(mid != lower && (rc = strcmp(s, dictionary[mid]))) {
+    if(rc < 0)
+      upper = mid;
+    else if(rc > 0)
+      lower = mid;
+    mid = (upper+lower)/2;
+  }
+
+  if(rc == 0 || strcmp(s, dictionary[mid]) == 0)
+    return true;
+
+  return false;
+}
+
+const char* Dictionary::rand(size_t len) {
+  int index;
+
+  do {
+    index = ::rand()%DICTIONARY_SIZE;
+  } while(strlen(dictionary[index]) != len);
+
+  return dictionary[index];
+}
+
+const char Dictionary::dictionary[][8] = {
   "aah",
   "abacus",
   "abalone",
