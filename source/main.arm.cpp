@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
     redraw = 0;
 
-    down = keysDown() | keysDownRepeat();
+    down = keysDown() | (keysDownRepeat() & (KEY_UP|KEY_DOWN));
 
     if(down & KEY_UP)
       redraw = 1, scroll--;
