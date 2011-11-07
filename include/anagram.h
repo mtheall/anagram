@@ -4,6 +4,7 @@
 #define GRAM_SIZE 169 //this is the most anagrams possible (for the word 'carpets')
 
 #include <string.h>
+#include "dictionary.h"
 
 typedef struct
 {
@@ -13,6 +14,7 @@ typedef struct
 
 class Anagram {
 private:
+  Dictionary dict;
   int  numGrams;
   gram grams[GRAM_SIZE];
   char scrambled[8];

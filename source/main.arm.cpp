@@ -4,8 +4,10 @@
 #include <time.h>
 
 #include "anagram.h"
-#include "gui.h"
 #include "console.h"
+#include "decompress.h"
+#include "gfx.h"
+#include "gui.h"
 
 #define HISTORY_SIZE 22
 
@@ -67,12 +69,24 @@ void addHistory(char *guess) {
   strcpy(history[i], guess);
 }
 
+const hword_t* map[] = {
+  carbonfiberMap,
+  checkerMap,
+  checker_darkMap,
+  diamondMap,
+  diamond_smallMap,
+  fiberMap,
+  weaveMap,
+};
+#define NUM_MAPS (sizeof(map)/sizeof(map[0]))
+
 int main(int argc, char *argv[]) {
   srand(time(NULL));
   int scroll = 0;
   int quit = 0;
   int down;
   int redraw = 0;
+  int mapNum = 0;
   styluspos_t touch;
 
   FeOS_DirectMode();
@@ -81,6 +95,9 @@ int main(int argc, char *argv[]) {
   console = new Console();
   anagram = new Anagram();
 
+  //copy bg tiles
+  decompress(map[mapNum], bgGetMapPtr(0));
+
   reset();
   scroll = printList(scroll);
   console->flush();
@@ -88,6 +105,7 @@ int main(int argc, char *argv[]) {
   keysSetRepeat(30, 6);
 
   while(!quit) {
+    bgScrollf(0, -48, 48);
     swiWaitForVBlank();
     if(redraw) {
       scroll = printList(scroll);
@@ -108,6 +126,12 @@ int main(int argc, char *argv[]) {
     else if(down & KEY_X) {
       redraw = 1;
       strfry(choices);
+      if(strlen(choices) == strlen(solution))
+        strcpy(solution, choices);
+    }
+    else if(down & KEY_Y) {
+      mapNum = (mapNum+1)%NUM_MAPS;
+      decompress(map[mapNum], bgGetMapPtr(0));
     }
 
     if(down & KEY_TOUCH)

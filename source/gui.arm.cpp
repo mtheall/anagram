@@ -1,8 +1,8 @@
 #include <feos.h>
 #include <string.h>
+#include "gfx.h"
 #include "gui.h"
-#include "font.h"
-#include "submit.h"
+#include "decompress.h"
 
 #define CHOICE_SIZE 32
 #define CHOICE_X    ((256-strlen(choices)*CHOICE_SIZE)/2)
@@ -21,6 +21,7 @@ Gui::Gui() {
   //enable video
   videoSetMode(MODE_0_2D);
   videoSetModeSub(MODE_0_2D);
+
   lcdMainOnBottom();
 
   //set up VRAM Banks
@@ -29,22 +30,30 @@ Gui::Gui() {
                       VRAM_C_SUB_BG,
                       VRAM_D_SUB_SPRITE);
 
+  //initialize main bg
+  bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
+
+  //copy bg data
+  decompress(bgTiles, bgGetGfxPtr(0));
+  decompress(bgPal,   BG_PALETTE);
+  dmaFillHalfWords(0, bgGetMapPtr(0), 2048);
+
   //initialize OAM
   oamInit(&oamMain, SpriteMapping_1D_128, false);
 
   //copy font tiles
-  for(int i = 0; i < 26; i++) {
-    font[i] = oamAllocateGfx(&oamMain, SpriteSize_16x16, SpriteColorFormat_256Color);
-    dmaCopy(&fontTiles[i*16*16], font[i], 16*16);
-  }
-  //copy submit tiles
-  for(int i = 0; i < 2; i++) {
-    submit[i] = oamAllocateGfx(&oamMain, SpriteSize_64x32, SpriteColorFormat_256Color);
-    dmaCopy(&submitTiles[i*64*32], submit[i], 64*32);
-  }
-  //copy sprite palette
-  dmaCopy(fontPal, SPRITE_PALETTE, fontPalLen);
+  decompress(spriteTiles, oamGetGfxPtr(&oamMain, 0)-32);
 
+  //copy sprite palette
+  decompress(spritePal, SPRITE_PALETTE);
+
+  //calculate addresses to tiles
+  for(int i = 0; i < 26; i++)
+    font[i] = oamGetGfxPtr(&oamMain, i*2);
+  for(int i = 0; i < 2; i++)
+    submit[i] = oamGetGfxPtr(&oamMain, 26*2 + i*16);
+
+  //set up affine for double size
   oamRotateScale(&oamMain, 0, 0, 1<<7, 1<<7);
 }
 

@@ -84,7 +84,7 @@ char* Anagram::init() {
   memset(grams, 0, sizeof(gram)*GRAM_SIZE);
   numGrams = 0;
 
-  strcpy(scrambled, Dictionary::rand(7));
+  strcpy(scrambled, dict.rand(7));
 
   permute(scrambled, 0, 8);
   strfry(scrambled);
@@ -102,7 +102,7 @@ void Anagram::permute(char *v, const int start, const int n) {
 
     //recurse
     if(start == n-1 && strlen(v) > 2) {
-      if(!exists(v) && Dictionary::isWord(v))
+      if(!exists(v) && dict.isWord(v))
         add(v);
     }
     else

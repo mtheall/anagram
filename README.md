@@ -18,5 +18,6 @@ Controls
 | A        | Input a word              |
 | B        | Quit the game             |
 | X        | Scramble the clue         |
+| Y        | Change background         |
 | START    | Start a new game          |
 
