@@ -58,14 +58,6 @@ Gui::Gui() {
 }
 
 Gui::~Gui() {
-  //free font tiles
-  for(int i = 0; i < 26; i++) {
-    oamFreeGfx(&oamMain, font[i]);
-  }
-  //free submit tiles
-  for(int i = 0; i < 2; i++) {
-    oamFreeGfx(&oamMain, submit[i]);
-  }
 }
 
 GuiRC_t Gui::update(char *choices, char *guess, const styluspos_t &touch) {

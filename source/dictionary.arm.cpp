@@ -34,13 +34,15 @@ Dictionary::Dictionary() {
         LZ77_Decompress(tmp, dictionary);
       }
       else {
+        fclose(fp);
         delete [] tmp;
         throw "Failed to read from file";
       }
+      fclose(fp);
+      delete [] tmp;
     }
-    else {
+    else
       throw strerror(errno);
-    }
   }
 
   refs++;
