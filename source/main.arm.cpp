@@ -1,4 +1,5 @@
 #include <feos.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -93,7 +94,16 @@ int main(int argc, char *argv[]) {
 
   gui     = new Gui();
   console = new Console();
-  anagram = new Anagram();
+  try {
+    anagram = new Anagram();
+  } catch (const char* err) {
+    delete console;
+    delete gui;
+    FeOS_ConsoleMode();
+    printf("Error allocating Anagram: %s\n", err);
+
+    return 1;
+  }
 
   //copy bg tiles
   decompress(map[mapNum], bgGetMapPtr(0));
