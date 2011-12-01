@@ -35,10 +35,7 @@ CONF_LIBS =
 
 include $(FEOSMK)/app.mk
 
-ifneq ($(strip $(DEST)),)
 install: all
-	@cp $(TARGET).fx2 $(DEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
-	@[ -d $(DEST)/data/anagram ] || mkdir -p $(DEST)/data/anagram || exit 1
-	@cp bin/dict.z $(DEST)/data/anagram || exit 1
-endif
-
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
+	@[ -d $(FEOSDEST)/data/anagram ] || mkdir -p $(FEOSDEST)/data/anagram || exit 1
+	@cp bin/dict.z $(FEOSDEST)/data/anagram || exit 1
