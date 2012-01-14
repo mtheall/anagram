@@ -29,9 +29,10 @@ SOURCES       := source
 DATA          := data
 INCLUDES      := include
 
-CONF_DEFINES =
-CONF_LIBDIRS =
-CONF_LIBS =
+CONF_DEFINES  =
+CONF_USERLIBS = feos3d
+CONF_LIBDIRS  =
+CONF_LIBS     = -lfeos3d
 
 include $(FEOSMK)/app.mk
 

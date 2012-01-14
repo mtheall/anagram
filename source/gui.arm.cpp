@@ -1,4 +1,5 @@
 #include <feos.h>
+#include <feos3d.h>
 #include <string.h>
 #include "gfx.h"
 #include "gui.h"
@@ -19,51 +20,79 @@
 
 Gui::Gui() {
   //enable video
-  videoSetMode(MODE_0_2D);
+  videoSetMode(MODE_0_3D);
   videoSetModeSub(MODE_0_2D);
 
   lcdMainOnBottom();
 
   //set up VRAM Banks
-  vramSetPrimaryBanks(VRAM_A_MAIN_BG,
-                      VRAM_B_MAIN_SPRITE,
+  vramSetPrimaryBanks(VRAM_A_TEXTURE_SLOT0,
+                      VRAM_B_MAIN_BG_0x06000000,
                       VRAM_C_SUB_BG,
                       VRAM_D_SUB_SPRITE);
+  vramSetBankE(VRAM_E_TEX_PALETTE);
 
   //initialize main bg
-  bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
+  bgInit(1, BgType_Text8bpp, BgSize_T_256x256, 1, 0);
 
   //copy bg data
-  decompress(bgTiles, bgGetGfxPtr(0));
+  decompress(bgTiles, bgGetGfxPtr(1));
   decompress(bgPal,   BG_PALETTE);
-  dmaFillHalfWords(0, bgGetMapPtr(0), 2048);
+  dmaFillHalfWords(0, bgGetMapPtr(1), 2048);
 
-  //initialize OAM
-  oamInit(&oamMain, SpriteMapping_1D_128, false);
+  //initialize 3D
+  glInit();
 
-  //copy font tiles
-  decompress(spriteTiles, oamGetGfxPtr(&oamMain, 0)-32);
+  glEnable(GL_TEXTURE_2D);
+  glClearColor(0, 0, 0, 0);
+  glClearPolyID(63);
+  glClearDepth(GL_MAX_DEPTH);
+  glViewport(0, 0, 255, 191);
 
-  //copy sprite palette
-  decompress(spritePal, SPRITE_PALETTE);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrthof32(0, 256, 192, 0, -1<<12, 1<<12);
+  glPolyFmt(POLY_ALPHA(31) | POLY_CULL_NONE);
+  glMatrixMode(GL_MODELVIEW);
+  glColor(RGB15(31, 31, 31));
 
-  //calculate addresses to tiles
-  for(int i = 0; i < 26; i++)
-    font[i] = oamGetGfxPtr(&oamMain, i*2);
-  for(int i = 0; i < 2; i++)
-    submit[i] = oamGetGfxPtr(&oamMain, 26*2 + i*16);
+  texdata = decompress(fontTex, NULL);
+  texpal = decompress(spritePal, NULL);
 
-  //set up affine for double size
-  oamRotateScale(&oamMain, 0, 0, 1<<7, 1<<7);
+  glGenTextures(2, textures);
+  glBindTexture(0, textures[0]);
+  glTexImage2D(0, 0, GL_RGB256, TEXTURE_SIZE_512, TEXTURE_SIZE_16, 0, TEXGEN_TEXCOORD | GL_TEXTURE_COLOR0_TRANSPARENT, texdata);
+  glColorTableEXT(0, 0, 256, 0, 0, (hword_t*)texpal);
+
+  delete texdata;
+  delete texpal;
+
+  texdata = decompress(submitTex, NULL);
+
+  glBindTexture(0, textures[1]);
+  glTexImage2D(0, 0, GL_RGB256, TEXTURE_SIZE_128, TEXTURE_SIZE_32, 0, TEXGEN_TEXCOORD | GL_TEXTURE_COLOR0_TRANSPARENT, texdata);
+  glAssignColorTable(0, textures[0]);
+
+  delete texdata;
 }
 
 Gui::~Gui() {
 }
 
+static inline void drawLetter(int offset, int x, int y, int size) {
+  glTexCoord2t16(inttot16(offset*16),    inttot16(0));
+  glVertex3v16(x,      y,      1);
+  glTexCoord2t16(inttot16(offset*16+16), inttot16(0));
+  glVertex3v16(x+size, y,      1);
+  glTexCoord2t16(inttot16(offset*16+16), inttot16(16));
+  glVertex3v16(x+size, y+size, 1);
+  glTexCoord2t16(inttot16(offset*16),    inttot16(16));
+  glVertex3v16(x,      y+size, 1);
+}
+
 GuiRC_t Gui::update(char *choices, char *guess, const styluspos_t &touch) {
   word_t x, y;
   int picked;
-  int index = 0;
   int offset;
   GuiRC_t rc = GuiRC_None;
 
@@ -81,72 +110,45 @@ GuiRC_t Gui::update(char *choices, char *guess, const styluspos_t &touch) {
   if(x > SUBMIT_X && x < SUBMIT_X+SUBMIT_W && y > SUBMIT_Y && y < SUBMIT_Y+SUBMIT_H)
     rc = GuiRC_Submit;
 
-  oamClear(&oamMain, 0, 128);
+  glBegin(GL_QUAD);
 
-  /* draw choice tiles */
-  x = CHOICE_X-CHOICE_SIZE;
-  y = CHOICE_Y;
-  while(*choices) {
-    offset = (*choices - 'a');
-    x += CHOICE_SIZE;
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
 
-    oamSet(&oamMain,
-           index++,
-           x, y,
-           0,     //priority
-           0,     //palette
-           SpriteSize_16x16, SpriteColorFormat_256Color,
-           font[offset],
-           0,     //affine index
-           true,  //double size
-           false, //hide
-           false, //hflip
-           false, //vflip
-           false);//mosaic
+    /* draw choice tiles */
+    x = CHOICE_X-CHOICE_SIZE;
+    y = CHOICE_Y;
+    while(*choices) {
+      offset = (*choices - 'a');
+      x += CHOICE_SIZE;
 
-    choices++;
-  }
+      drawLetter(offset, x, y, CHOICE_SIZE);
+      choices++;
+    }
 
-  /* draw guess tiles */
-  x = GUESS_X-GUESS_SIZE;
-  y = GUESS_Y;
-  while(*guess) {
-    offset = (*guess - 'a');
-    x += GUESS_SIZE;
+    /* draw guess tiles */
+    x = GUESS_X-GUESS_SIZE;
+    y = GUESS_Y;
+    while(*guess) {
+      offset = (*guess - 'a');
+      x += GUESS_SIZE;
 
-    oamSet(&oamMain,
-           index++,
-           x, y,
-           0,     //priority
-           0,     //palette
-           SpriteSize_16x16, SpriteColorFormat_256Color,
-           font[offset],
-           -1,    //affine index
-           false, //double size
-           false, //hide
-           false, //hflip
-           false, //vflip
-           false);//mosaic
+      drawLetter(offset, x, y, GUESS_SIZE);
+      guess++;
+    }
 
-    guess++;
-  }
+    /* draw submit tiles */
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    glTexCoord2t16(inttot16(0),        inttot16(0));
+    glVertex3v16(SUBMIT_X,          SUBMIT_Y,          1);
+    glTexCoord2t16(inttot16(SUBMIT_W), inttot16(0));
+    glVertex3v16(SUBMIT_X+SUBMIT_W, SUBMIT_Y,          1);
+    glTexCoord2t16(inttot16(SUBMIT_W), inttot16(SUBMIT_H));
+    glVertex3v16(SUBMIT_X+SUBMIT_W, SUBMIT_Y+SUBMIT_H, 1);
+    glTexCoord2t16(inttot16(0),        inttot16(SUBMIT_H));
+    glVertex3v16(SUBMIT_X,          SUBMIT_Y+SUBMIT_H, 1);
 
-  /* draw submit tiles */
-  for(int i = 0; i < 2; i++) {
-    oamSet(&oamMain,
-           index++,
-           SUBMIT_X + i*64, SUBMIT_Y,
-           0,     //priority
-           0,     //palette
-           SpriteSize_64x32, SpriteColorFormat_256Color,
-           submit[i],
-           -1,    //affine index
-           false, //double size
-           false, //hide
-           false, //hflip
-           false, //vflip
-           false);//mosaic
-  }
+  glEnd();
 
+  glFlush(0);
   return rc;      
 }

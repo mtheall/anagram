@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   }
 
   //copy bg tiles
-  decompress(map[mapNum], bgGetMapPtr(0));
+  decompress(map[mapNum], bgGetMapPtr(1));
 
   reset();
   scroll = printList(scroll);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
   keysSetRepeat(30, 6);
 
   while(!quit) {
-    bgScrollf(0, -48, 48);
+    bgScrollf(1, -48, 48);
     swiWaitForVBlank();
     if(redraw) {
       scroll = printList(scroll);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
     else if(down & KEY_Y) {
       mapNum = (mapNum+1)%NUM_MAPS;
-      decompress(map[mapNum], bgGetMapPtr(0));
+      decompress(map[mapNum], bgGetMapPtr(1));
     }
 
     if(down & KEY_TOUCH)

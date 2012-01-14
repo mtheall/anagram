@@ -13,7 +13,7 @@ void LZ77_Decompress(const void* in, void* out);
 }
 #endif
 
-static inline void decompress(const void *src, void *dst) {
+static inline byte_t* decompress(const void *src, void *dst) {
   int size;
   byte_t *tmp;
 
@@ -23,8 +23,14 @@ static inline void decompress(const void *src, void *dst) {
   tmp = new byte_t[size];
   LZ77_Decompress(src, tmp);
   DC_FlushRange(tmp, size);
-  dmaCopy(tmp, dst, size);
-  delete [] tmp;
+
+  if(dst) {
+    dmaCopy(tmp, dst, size);
+    delete [] tmp;
+    return (byte_t*)dst;
+  }
+  else
+    return tmp;
 }
 
 #endif /* DECOMPRESS_H */

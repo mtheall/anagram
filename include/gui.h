@@ -11,8 +11,9 @@ typedef enum
 
 class Gui {
 private:
-  hword_t *font[26];
-  hword_t *submit[2];
+  byte_t  *texdata;
+  byte_t  *texpal;
+  int     textures[2];
 
 public:
   Gui();

@@ -3,7 +3,8 @@
 
 extern const unsigned short bgTiles[];
 extern const unsigned short bgPal[];
-extern const unsigned short spriteTiles[];
+extern const unsigned short fontTex[];
+extern const unsigned short submitTex[];
 extern const unsigned short spritePal[];
 extern const unsigned short carbonfiberMap[];
 extern const unsigned short checker_darkMap[];
