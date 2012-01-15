@@ -77,6 +77,7 @@ Gui::Gui() {
 }
 
 Gui::~Gui() {
+  glDeinit();
 }
 
 static inline void drawLetter(int offset, int x, int y, int size) {
