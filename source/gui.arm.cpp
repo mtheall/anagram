@@ -91,14 +91,14 @@ static inline void drawLetter(int offset, int x, int y, int size) {
   glVertex3v16(x,      y+size, 1);
 }
 
-GuiRC_t Gui::update(char *choices, char *guess, const styluspos_t &touch) {
+GuiRC_t Gui::update(char *choices, char *guess, const touchPosition &touch) {
   word_t x, y;
   int picked;
   int offset;
   GuiRC_t rc = GuiRC_None;
 
-  x = touch.x;
-  y = touch.y;
+  x = touch.px;
+  y = touch.py;
 
   //move a letter from the choices list to the guess list
   if(x > CHOICE_X && x < CHOICE_SIZE*strlen(choices)+CHOICE_X && y > CHOICE_Y && y < CHOICE_Y+CHOICE_SIZE) {

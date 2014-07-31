@@ -81,16 +81,15 @@ const hword_t* map[] = {
 };
 #define NUM_MAPS (sizeof(map)/sizeof(map[0]))
 
-int main(int argc, char *argv[]) {
+static int play(void *userData)
+{
   srand(time(NULL));
   int scroll = 0;
   int quit = 0;
   int down;
   int redraw = 0;
   int mapNum = 0;
-  styluspos_t touch;
-
-  FeOS_DirectMode();
+  touchPosition touch;
 
   gui     = new Gui();
   console = new Console();
@@ -99,10 +98,8 @@ int main(int argc, char *argv[]) {
   } catch (const char* err) {
     delete console;
     delete gui;
-    FeOS_ConsoleMode();
-    printf("Error allocating Anagram: %s\n", err);
 
-    return 1;
+    return EXIT_FAILURE;
   }
 
   //copy bg tiles
@@ -145,7 +142,7 @@ int main(int argc, char *argv[]) {
     }
 
     if(down & KEY_TOUCH)
-      FeOS_GetStylusPos(&touch);
+      touchRead(&touch);
     else
       memset(&touch, 0, sizeof(touch));
 
@@ -166,8 +163,9 @@ int main(int argc, char *argv[]) {
   delete console;
   delete anagram;
 
-  FeOS_ConsoleMode();
-
-  return 0;
+  return EXIT_SUCCESS;
 }
 
+int main(int argc, char *argv[]) {
+  return DSRequestHardware(play, NULL, NULL);
+}

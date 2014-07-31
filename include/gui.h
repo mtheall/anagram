@@ -19,7 +19,7 @@ public:
   Gui();
   ~Gui();
 
-  GuiRC_t update(char *choices, char *guess, const styluspos_t &touch);
+  GuiRC_t update(char *choices, char *guess, const touchPosition &touch);
 };
 
 #endif /* GUI_H */
