@@ -1,3 +1,4 @@
 anagram.*
+!anagram.manifest
 build/
 bin/*.bin
