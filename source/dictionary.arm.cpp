@@ -6,8 +6,6 @@
 #include "decompress.h"
 #include "dictionary.h"
 
-#define FILENAME "/data/anagram/dict.z"
-
 typedef struct {
   char entry[8];
 } dictEntry;
@@ -21,7 +19,7 @@ Dictionary::Dictionary() {
     FILE *fp;
     int rc;
 
-    if((fp = fopen(FILENAME, "r"))) {
+    if((fp = fopen(DICT_FILE, "r"))) {
       fseek(fp, 0, SEEK_END);
       int sz = ftell(fp);
       char *tmp = new char[sz];

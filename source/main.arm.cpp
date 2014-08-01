@@ -112,8 +112,10 @@ static int play(void *userData)
   keysSetRepeat(30, 6);
 
   while(!quit) {
-    bgScrollf(1, -48, 48);
     swiWaitForVBlank();
+    bgScrollf(1, -48, 48);
+    bgUpdate();
+    scanKeys();
     if(redraw) {
       scroll = printList(scroll);
       console->flush();

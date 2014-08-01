@@ -23,7 +23,7 @@ FEOSMK = $(FEOSSDK)/mk
 # DATA is a list of directories containing data files
 # INCLUDES is a list of directories containing header files
 #---------------------------------------------------------------------------------
-TARGET        := $(notdir $(CURDIR))
+TARGET        := anagram
 BUILD         := build
 SOURCES       := source
 DATA          := data
@@ -33,10 +33,14 @@ CONF_DEFINES  =
 CONF_USERLIBS = feos3d
 CONF_LIBDIRS  =
 CONF_LIBS     = -lfeos3d
+CONF_CXXFLAGS = -DDICT_FILE="\"/data/anagram/dict.z\""
+MANIFEST      = $(TARGET).manifest
 
 include $(FEOSMK)/app.mk
 
 install: all
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
-	@[ -d $(FEOSDEST)/data/anagram ] || mkdir -p $(FEOSDEST)/data/anagram || exit 1
-	@cp bin/dict.z $(FEOSDEST)/data/anagram || exit 1
+	@[ -d $(FEOSDEST)/data/$(TARGET) ] || mkdir -p $(FEOSDEST)/data/$(TARGET) || exit 1
+	@cp bin/dict.z $(FEOSDEST)/data/$(TARGET)/dict.z || exit 1
+	@grit icon.png -ftr -fh! -gb -gB16 -gT7FFE -gzl -p! -o $(FEOSDEST)/data/FeOS/gui/$(TARGET).grf
+	@fmantool $(MANIFEST) $(FEOSDEST)/data/FeOS/gui/$(TARGET).app
